@@ -12,7 +12,7 @@ int main(void){
   stdio_init_all();
 
   gpio_init(PICO_DEFAULT_LED_PIN);
-  
+  gpio_put(PICO_DEFAULT_LED_PIN, 1);
   while(1){
 
   }
