@@ -12,6 +12,7 @@ target_link_libraries(mii
             hardware_dma
             )
 
+# Pro debugger použít UART + propojit TX RX
 pico_enable_stdio_usb(mii 0)
 pico_enable_stdio_uart(mii 1)
 

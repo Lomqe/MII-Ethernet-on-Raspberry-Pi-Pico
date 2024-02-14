@@ -1,0 +1,2 @@
+Poznámky během vývoje firmwaru
+
