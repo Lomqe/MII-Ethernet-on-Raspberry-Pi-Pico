@@ -1,5 +1,8 @@
 #pragma once
 
+// The default PHY address is 00001 and may vary from 1-7 (0 = broadcast)
+uint8_t phy_address = 1u;
+
 // 67 BYTE LENGTH
 uint8_t test_packet[] = {
     //  Ethernet II
@@ -27,5 +30,24 @@ uint8_t test_packet[] = {
 
 #define SYSTEM_FREQ_100000_KHZ 100000u
 
-// GPIO2 -> KSZ_RESET
-#define RST_KSZ 2u
+#define KSZ_RST 2u
+#define KSZ_CRS_OR_CONFIG1 4u
+#define KSZ_COL_OR_CONFIG0 5u
+#define KSZ_INTRP_OR_NAND_TREE 6u
+#define KSZ_RXDV_OR_CONFIG2 7u
+#define KSZ_RXER_OR_ISO 8u
+#define KSZ_TXEN 9u
+#define KSZ_TXD3 10u
+#define KSZ_TXD2 11u
+#define KSZ_TXD1 12u
+#define KSZ_TXD0 13u
+#define KSZ_TXC 14u
+#define KSZ_RXC_OR_B_CAST_OFF 15u
+#define KSZ_RXD0_OR_DUPLEX 16u
+#define KSZ_RXD1_OR_PHYAD2 17u
+#define KSZ_RXD2_OR_PHYAD1 18u
+#define KSZ_RXD3_OR_PHYDA0 19u
+#define KSZ_MDC 20u
+#define KSZ_MDIO 21u
+#define KSZ_SENSOR1 26u
+#define KSZ_SENSOR2 27u
