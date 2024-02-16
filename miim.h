@@ -108,14 +108,14 @@ static uint16_t mii_mdio_read(uint addr, uint reg){
 
     // PHY
     for (int i = 0; i < 5; i++){
-        uint bit = (addr >> (4 - i)) & 0x01;
+        uint bit = (addr >> (4 - i)) & 0x1;
 
         mii_mdio_out(bit);
     }
 
     // REG
     for (int i = 0; i < 5; i++) {
-        uint bit = (reg >> (4 - i)) & 0x01;
+        uint bit = (reg >> (4 - i)) & 0x1;
 
         mii_mdio_out(bit);
     }
