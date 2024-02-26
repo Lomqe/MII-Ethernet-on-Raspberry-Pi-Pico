@@ -31,10 +31,9 @@ static inline void mii_tx(PIO pio, uint sm, uint offset, uint pin) {
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
     sm_config_set_out_shift(&c, true, true, 5);
     
-    // 100 MHZ / 40 =  2.5  MHZ
-    // 100 MHZ / 20 =  5.0  MHZ
+    // 100 MHZ / 5 =  20.0  MHZ
     // 100 MHZ / 10 = 10.0  MHZ
-    sm_config_set_clkdiv(&c, 20);
+    sm_config_set_clkdiv(&c, 5);
 
     pio_sm_init(pio, sm, offset, &c);
     pio_sm_set_enabled(pio, sm, true);
