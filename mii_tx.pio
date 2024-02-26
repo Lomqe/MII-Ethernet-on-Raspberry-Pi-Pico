@@ -1,0 +1,42 @@
+/*
+ * Copyright (c) 2021 Sandeep Mistry
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+.program mii_tx
+.side_set 1
+
+.wrap_target
+    out pins 5  side 0 [1]
+    nop         side 1 [1]
+.wrap
+
+% c-sdk {
+
+static inline void mii_tx(PIO pio, uint sm, uint offset, uint pin) {
+    pio_gpio_init(pio, pin);        // TXEN
+    pio_gpio_init(pio, pin + 1);    // TX3
+    pio_gpio_init(pio, pin + 2);    // TX2
+    pio_gpio_init(pio, pin + 3);    // TX1
+    pio_gpio_init(pio, pin + 4);    // TX0
+    pio_gpio_init(pio, pin + 5);    // TXC
+
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 6, true);
+
+    pio_sm_config c = mii_tx_program_get_default_config(offset);
+    sm_config_set_out_pins(&c, pin, 5);
+    sm_config_set_sideset_pins(&c, pin + 5);
+
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+    sm_config_set_out_shift(&c, true, true, 5);
+    
+    // 100 MHZ / 40 =  2.5  MHZ
+    // 100 MHZ / 20 =  5.0  MHZ
+    // 100 MHZ / 10 = 10.0  MHZ
+    sm_config_set_clkdiv(&c, 20);
+
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}
