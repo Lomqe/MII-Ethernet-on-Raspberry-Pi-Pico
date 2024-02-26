@@ -32,7 +32,6 @@ uint8_t phy_address = 1u;
 
 uint8_t preamble[] = {0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0xD5};
 
-// 69 BYTE LENGTH
 #define NCAT_PACKET_LENGTH 69u
 uint8_t netcat_packet[] = {
     //  Ethernet II
@@ -66,3 +65,5 @@ static uint8_t tx_frame_bits[TX_FRAME_SIZE * 2u];
 
 uint tx_dma;
 dma_channel_config tx_dma_config;
+
+uint sm_tx;
