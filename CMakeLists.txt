@@ -1,6 +1,6 @@
 add_executable(mii main.c)
 
-#pico_generate_pio_header(mii ${CMAKE_CURRENT_LIST_DIR}/temporary_name.pio)
+pico_generate_pio_header(mii ${CMAKE_CURRENT_LIST_DIR}/mii_tx.pio)
 
 
 # pull in common dependencies
