@@ -75,9 +75,9 @@ static void mii_ethernet_output(uint8_t* tx_buffer, uint length){
 
     dma_channel_configure(
         tx_dma, &tx_dma_config,
-        tx_frame,//pio_0->rxf[sm0] + 3,      // TODO - NADEFINOVAT PIO INSTANCI (zatim jen aby nehodilo error)
+        &pio0->txf[sm_tx],
         tx_frame_bits,
         index,
-        false
+        true
     );
 }
