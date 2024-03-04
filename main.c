@@ -1,5 +1,8 @@
 #include "includes.h"
 
+// Comment to set 100 Mbps
+#define _10_MBPS
+
 int main(void){
   // De-assert reset
   gpio_init(KSZ_RST);
@@ -9,19 +12,25 @@ int main(void){
   // Change sys_clk to 100 MHz
   set_sys_clock_khz(SYSTEM_FREQ_100000_KHZ, true);
   stdio_init_all();
-
-  // Set speed to 100 Mbps
-  //mii_mdio_write(phy_address, 0, 0x2000);
   
-  // Set speed to 10 Mbps
-  mii_mdio_write(phy_address, 0, 0x0);
+  sleep_ms(5000);
 
   // PIO
 
   sm_tx = pio_claim_unused_sm(pio0, true);
-  uint pio0_offset = pio_add_program(pio0, &mii_tx_program);
 
-  mii_tx_init(pio0, sm_tx, pio0_offset, KSZ_TXEN);
+  #ifdef _10_MBPS
+  // Set speed to 10 Mbps
+  mii_mdio_write(phy_address, 0, 0x0);
+  uint pio0_offset = pio_add_program(pio0, &mii_10mhz_tx_program);
+  mii_10mhz_tx_init(pio0, sm_tx, pio0_offset, KSZ_TXEN);
+
+  #else
+  // Set speed to 100 Mbps
+  mii_mdio_write(phy_address, 0, 0x2000);
+  uint pio0_offset = pio_add_program(pio0, &mii_100mhz_tx_program);
+  mii_100mhz_tx_init(pio0, sm_tx, pio0_offset, KSZ_TXEN);
+  #endif
 
   // DMA
 
