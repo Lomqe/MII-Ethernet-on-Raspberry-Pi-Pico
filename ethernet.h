@@ -41,31 +41,45 @@ static void mii_ethernet_output(uint8_t* tx_buffer, uint length){
     int index = 0;
 
     // PREAMBLE
-    //  TXE  D3   D2   D1   D0 
+    //  D0   D1   D2   D3   TXE 
     //  [1]  [0]  [1]  [0]  [1]
     for (int i = 0; i < 15; i++){
         tx_frame_bits[index++] = 0x15;
     }
 
     // SFD
-    //  TXE  D3   D2   D1   D0 
-    //  [1]  [1]  [1]  [0]  [1]
+    //  D0   D1   D2   D3   TXE 
+    //  [1]  [0]  [1]  [1]  [1]
     for (int i = 0; i < 1; i++){
-        tx_frame_bits[index++] = 0x1D;
+        tx_frame_bits[index++] = 0x17;
     }
 
     // DATA
     for (int i = 0; i < length; i++){
         uint8_t b = tx_buffer[i];
-        tx_frame_bits[index++] = 0x10 | ((b >> 0) & 0x0F);
-        tx_frame_bits[index++] = 0x10 | ((b >> 4) & 0x0F);
+        tx_frame_bits[index++] = 0x01 | ((b >> 2) & 0x02) 
+                                      | (b & 0x04)
+                                      | ((b << 2) & 0x08)
+                                      | ((b << 4) & 0x10);
+        b >>= 4;
+        tx_frame_bits[index++] = 0x01 | ((b >> 2) & 0x02) 
+                                      | (b & 0x04)
+                                      | ((b << 2) & 0x08)
+                                      | ((b << 4) & 0x10);
     }
 
     // CRC
     for (int i = 0; i < 2; i++){
         uint8_t b = ((uint8_t*)&crc)[i];
-        tx_frame_bits[index++] = 0x10 | ((b >> 0) & 0x0F);
-        tx_frame_bits[index++] = 0x10 | ((b >> 4) & 0x0F);
+        tx_frame_bits[index++] = 0x01 | ((b >> 2) & 0x02) 
+                                      | (b & 0x04)
+                                      | ((b << 2) & 0x08)
+                                      | ((b << 4) & 0x10);
+        b >>= 4;
+        tx_frame_bits[index++] = 0x01 | ((b >> 2) & 0x02) 
+                                      | (b & 0x04)
+                                      | ((b << 2) & 0x08)
+                                      | ((b << 4) & 0x10);
     }
     
     // IDLE
