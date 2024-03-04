@@ -12,7 +12,6 @@ int main(void){
   // Change sys_clk to 100 MHz
   set_sys_clock_khz(SYSTEM_FREQ_100000_KHZ, true);
   stdio_init_all();
-  
   sleep_ms(5000);
 
   // PIO
