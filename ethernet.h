@@ -19,9 +19,7 @@ static uint16_t ethernet_frame_crc(const uint8_t *data, int length){
         }
     }
     // pro ncat packet je CRC = 0xF203 a ~crc = 0x0DFC
-    return crc;
-     //   return ~crc;
-
+    return ~crc;
 }
 
 static void mii_ethernet_output(uint8_t* tx_buffer, int length){
@@ -39,8 +37,12 @@ static void mii_ethernet_output(uint8_t* tx_buffer, int length){
     // printf("\n");
 
     dma_channel_wait_for_finish_blocking(tx_dma);
+
+
     // irq > clear > reset SM na zacatek
-    pio_sm_restart()
+   // pio_sm_restart()
+
+   
     int index = 0;
 
     // PREAMBLE
