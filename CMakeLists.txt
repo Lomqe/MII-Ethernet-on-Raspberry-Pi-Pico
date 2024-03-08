@@ -5,10 +5,11 @@ pico_generate_pio_header(mii ${CMAKE_CURRENT_LIST_DIR}/mii_tx.pio)
 
 # pull in common dependencies
 target_link_libraries(mii 
-            pico_stdlib 
+            pico_stdlib
             hardware_irq
             pico_multicore 
             hardware_pio
+            hardware_adc
             hardware_dma
             )
 
