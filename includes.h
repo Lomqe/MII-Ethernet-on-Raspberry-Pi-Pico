@@ -7,6 +7,8 @@
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
 #include "hardware/dma.h"
+#include "hardware/adc.h"
+#include "pico/multicore.h"
 #include "hardware/clocks.h"
 
 // PROJECT

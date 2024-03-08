@@ -1,7 +1,7 @@
 #include "includes.h"
 
 // Comment to set 100 Mbps
-#define _10_MBPS
+//#define _10_MBPS
 
 int main(void){
   // De-assert reset
@@ -10,7 +10,7 @@ int main(void){
   gpio_put(KSZ_RST, false);
 
   // Change sys_clk to 100 MHz
-  set_sys_clock_khz(SYSTEM_FREQ_100000_KHZ, true);
+  set_sys_clock_khz(SYSTEM_FREQ_125000_KHZ, true);
   stdio_init_all();
   sleep_ms(5000);
 
@@ -41,14 +41,26 @@ int main(void){
   channel_config_set_read_increment(&tx_dma_config, true);
   channel_config_set_dreq(&tx_dma_config, pio_get_dreq(pio0, sm_tx, true));
 
-  // TX 
+  // ADC - TODO - ADC na druhý core (multicore)
+
+  adc_init();  
+  adc_gpio_init(RPP_SENSOR1);
+  adc_gpio_init(RPP_SENSOR2);
 
   uint16_t link = 0;
   while(true){
-    //power_test();
+    // power_test();
     // Wait so the network wont get congested
     sleep_ms(1000);
     printf("Control register = %02X\n", link = mii_mdio_read(phy_address, 0));
+
+    // ADC test
+    adc_select_input(0);
+    uint16_t sensor1_val = adc_read();
+    adc_select_input(1);
+    uint16_t sensor2_val = adc_read();
+    printf("Hodnota senzoru:\t[1] = %d\t[2] = %d\n", sensor1_val, sensor2_val);
+    
     // Re-sending a unique packet
     mii_ethernet_output(netcat_packet, NCAT_PACKET_LENGTH);
     printf("dma proc...\n");}
