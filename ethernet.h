@@ -38,7 +38,7 @@ static void mii_ethernet_output(uint8_t* tx_buffer, int length){
 
     dma_channel_wait_for_finish_blocking(tx_dma);
 
-
+    
     // irq > clear > reset SM na zacatek
    // pio_sm_restart()
 
@@ -81,7 +81,7 @@ static void mii_ethernet_output(uint8_t* tx_buffer, int length){
                                       | ((b << 2) & 0x08)
                                       | ((b << 4) & 0x10);
         b >>= 4;
-        tx_frame_bits[index++] = 0x01 | ((b >> 2) & 0x02) 
+        tx_frame_bits[index++] = 0x01 | ((b >> 2) & 0x02)
                                       | (b & 0x04)
                                       | ((b << 2) & 0x08)
                                       | ((b << 4) & 0x10);
