@@ -17,3 +17,12 @@ void power_test(){
           sleep_ms(80);
         }
 }
+
+#define TEST_PIN 22u
+// Test impulse, intended to be used when TXEN is set
+void test_impulse(){
+  gpio_set_dir(TEST_PIN, true);
+
+  gpio_put(TEST_PIN, true);
+  gpio_put(TEST_PIN, false);
+}
