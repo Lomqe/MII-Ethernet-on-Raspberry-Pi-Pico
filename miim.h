@@ -49,7 +49,7 @@ static void mii_mdio_write(uint addr, uint reg, int val){
     gpio_set_dir(KSZ_MDC, GPIO_OUT);
 
     // PRE_32
-    for (int i = 0; i < 32; i++){
+    for (int i = 0; i < 32; ++i){
         mii_mdio_out(1);
     }
 
@@ -62,13 +62,13 @@ static void mii_mdio_write(uint addr, uint reg, int val){
     mii_mdio_out(1);
 
     // PHY
-    for (int i = 0; i < 5; i++){
+    for (int i = 0; i < 5; ++i){
         bool bit = (addr >> (4 - i)) & 0x1;
         mii_mdio_out(bit);
     }
 
     // REG
-    for (int i = 0; i < 5; i++){
+    for (int i = 0; i < 5; ++i){
         bool bit = (reg >> (4 - i)) & 0x1;
         mii_mdio_out(bit);
     }
@@ -78,7 +78,7 @@ static void mii_mdio_write(uint addr, uint reg, int val){
     mii_mdio_out(0);
 
     // DATA
-    for (int i = 0; i < 16; i++){
+    for (int i = 0; i < 16; ++i){
         uint bit = (val >> (15 - i)) & 0x1;
         mii_mdio_out(bit);
     }
@@ -94,7 +94,7 @@ static uint16_t mii_mdio_read(uint addr, uint reg){
     gpio_set_dir(KSZ_MDC, GPIO_OUT);
 
     // PRE_32
-    for (int i = 0; i < 32; i++){
+    for (int i = 0; i < 32; ++i){
         mii_mdio_out(1);
     }
 
@@ -107,14 +107,14 @@ static uint16_t mii_mdio_read(uint addr, uint reg){
     mii_mdio_out(0);
 
     // PHY
-    for (int i = 0; i < 5; i++){
+    for (int i = 0; i < 5; ++i){
         uint bit = (addr >> (4 - i)) & 0x1;
 
         mii_mdio_out(bit);
     }
 
     // REG
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; ++i) {
         uint bit = (reg >> (4 - i)) & 0x1;
 
         mii_mdio_out(bit);
@@ -127,7 +127,7 @@ static uint16_t mii_mdio_read(uint addr, uint reg){
 
     uint16_t data = 0;
 
-    for (int i = 0; i < 16; i++){
+    for (int i = 0; i < 16; ++i){
         data <<= 1;
         data |= mii_mdio_in();
     }
