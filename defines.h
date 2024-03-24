@@ -130,10 +130,6 @@ struct sensor{
 #define SENSOR1_MAX_VAL sensor1_lut_volt[0]
 #define SENSOR1_MIN_VAL sensor1_lut_volt[18]
 // Sensors 10-80 prox. LUT from datasheet 
-
-    //                example for values between 50 - 60 cm
-    //                60   - (60-50)     * (val-1.05) / (1.25-1.05)
-    //                i[2] - (i[2]-i[1]) * (val-i[2]) / (i[1]-i[2])
 float sensor1_lut_volt[] = {2.60, 2.45, 2.11, 1.87, 1.65, 1.51, 1.39, 1.13, 0.98, 0.85, 0.75, 0.68, 0.61, 0.58, 0.52, 0.50, 0.47, 0.43, 0.41};
 uint8_t sensor1_lut_cm[] = {10, 10, 12, 14, 16, 18, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80};
 
