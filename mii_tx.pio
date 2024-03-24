@@ -1,10 +1,78 @@
+; kvuli PREAMBLE + SFD musim nastavit overlap pres out piny 
+;
+;           CLK     TX0     TX1     TX2     TX3     TXEN
+;            ^       ^       ^       ^       ^       ^
+;            |       |       |       |       |       |
+;           side    out     out     out     out     set
+;                    +       +       +       +       
+;                   set     set     set     set     
+.program mii_opt_tx
+.side_set 1 opt
+.wrap_target    
+    pull                side 0      ; pull counter val
+    out null, 24                    ; counter is stored on left so remove 24 bits first
+    set x, 14                       ; preamble count
+    mov y, osr               
+    out null, 8                     ; discrad the counter after storing it into Y scratch
+    
+    ;set y, 31           side 0     ; Pouze pro DEBUG 
+    preamble:   
+    set pins 0b10101    side 0 [2]  
+    jmp x-- preamble    side 1 [1]
+    
+;   SFD
+    set x, 23           side 0      ; priprava registru X na IFG
+    set pins 0b10111    side 0 [1]  
+    nop                 side 1 [1]
+        
+    data:                           ; data + crc         
+    pull                side 0
+    out pins 4          side 0 [1]  ; 4 bity z OSR
+    nop                 side 1 [1]
+
+    out pins 4          side 0 [2]
+    jmp y-- data        side 1 [1]
+
+    ifg:                            ; 24 nibblu
+    set pins 0b00000    side 0 [2]  
+    jmp x-- ifg         side 1 [1]
+
+    irq wait 0          side 0      ; Pro sledování z venčí (pio_sm_blocking)
+.wrap
+
+% c-sdk {
+
+static inline void mii_opt_tx_init(PIO pio, uint sm, uint offset, uint pin) {
+    pio_gpio_init(pio, pin);        // TXEN
+    pio_gpio_init(pio, pin + 1);    // TX3
+    pio_gpio_init(pio, pin + 2);    // TX2         
+    pio_gpio_init(pio, pin + 3);    // TX1
+    pio_gpio_init(pio, pin + 4);    // TX0
+    pio_gpio_init(pio, pin + 5);    // TXC
+
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 6, true);
+
+    pio_sm_config c = mii_opt_tx_program_get_default_config(offset);
+    sm_config_set_set_pins(&c, pin, 5);
+    sm_config_set_out_pins(&c, pin+1, 4);
+    sm_config_set_sideset_pins(&c, pin + 5);
+
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+    sm_config_set_out_shift(&c, true, false, 8);
+
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}
+
+
 .program mii_100mhz_tx
 .side_set 1
 
 .wrap_target
+    nop         side 0 
     out pins 5  side 0 [1]  ; 16 ns setup time (with 125 MHz clk) 
     nop         side 1 [1]
-    nop         side 0 
 .wrap
 
 % c-sdk {
@@ -35,9 +103,9 @@ static inline void mii_100mhz_tx_init(PIO pio, uint sm, uint offset, uint pin) {
 .side_set 1
 
 .wrap_target
+    nop         side 0 
     out pins 5  side 0 [1]  ; 160 ns setup time (with 125 MHz clk) 
     nop         side 1 [1]
-    nop         side 0 
 .wrap
 
 % c-sdk {
@@ -65,3 +133,120 @@ static inline void mii_10mhz_tx_init(PIO pio, uint sm, uint offset, uint pin) {
     pio_sm_set_enabled(pio, sm, true);
 }
 %}
+
+
+.program mii_opt_tx2
+.side_set 1 opt
+.wrap_target    
+    pull                side 0      ; pull counter val
+    out null, 24                    ; counter is stored on left so remove 24 bits first
+    set x, 14                       ; preamble count
+    mov y, osr               
+    out null, 8                     ; discrad the counter val 
+                                    ; after storing it into Y scratch
+    
+    ;set y, 20                      ; DEBUG ONLY
+    preamble:   
+    set pins 0b10101    side 0 [2]  
+    jmp x-- preamble    side 1 [1]
+    
+;   SFD
+    set x, 23           side 0      ; priprava registru X na IFG
+    set pins 0b10111    side 0 [1]  
+    nop                 side 1 [1]
+        
+    data:                           ; data + crc         
+    out pins 4          side 0 [1]  ; 4 bits from OSR
+    nop                 side 1 [1]
+    jmp y-- data        side 0 
+
+    ifg:                            
+    set pins 0b00000    side 0 [2]  
+    jmp x-- ifg         side 1 [1]
+
+    irq wait 0          side 0     ; Pro sledování z venčí ("pio_sm_blocking")
+.wrap
+
+
+% c-sdk {
+
+static inline void mii_opt_tx2_init(PIO pio, uint sm, uint offset, uint pin) {
+    pio_gpio_init(pio, pin);        // TXEN
+    pio_gpio_init(pio, pin + 1);    // TX3
+    pio_gpio_init(pio, pin + 2);    // TX2         
+    pio_gpio_init(pio, pin + 3);    // TX1
+    pio_gpio_init(pio, pin + 4);    // TX0
+    pio_gpio_init(pio, pin + 5);    // TXC
+
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 6, true);
+
+    pio_sm_config c = mii_opt_tx2_program_get_default_config(offset);
+    sm_config_set_set_pins(&c, pin, 5);
+    sm_config_set_out_pins(&c, pin+1, 4);
+    sm_config_set_sideset_pins(&c, pin + 5);
+
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+    sm_config_set_out_shift(&c, true, true, 32);
+
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}
+
+
+.program mii_opt_tx_NOT_IN_USE
+.side_set 1 
+; pouze pro zkousku abych otestoval IRQ z venci.
+; jedna se o statickou velikost bufferu a neni uplne
+; optimalni, pio program je akorat 32 instrukci
+.wrap_target    
+    set x, 14           side 0      ; preamble count
+    set y, 30           side 0 [2]    ;debug instrukce POUZE
+    
+    preamble:   
+    set pins 0b10101    side 0 [2]  
+    jmp x-- preamble    side 1 [1]
+    
+;   SFD
+    set pins 0b10111    side 0 [2]  
+    nop                 side 1 [1]
+        
+    data:                           ; data + crc         
+    pull                side 0
+    out pins 4          side 0 [1]  ; 4 bity z OSR
+    nop                 side 1 [1]
+
+    out pins 4          side 0 [2]
+    jmp y-- data        side 1 [1]
+                                                
+    pull                side 0  
+    out pins 4          side 0
+    set y, 30           side 0
+    set x, 20           side 1 
+    nop                 side 1
+
+    data1:                           ; data + crc         
+    pull                side 0
+    out pins 4          side 0 [1]  ; 4 bity z OSR
+    nop                 side 1 [1]
+
+    out pins 4          side 0 [2]
+    jmp y-- data1       side 1 [1]
+
+    data2:        
+    pull                side 0
+    out pins 4          side 0 [1]  ; 4 bity z OSR
+    nop                 side 1 [1]
+
+    out pins 4          side 0 [2]
+    jmp x-- data2       side 1 [1]
+    
+    out pins 4          side 0 [2]
+    set x, 31           side 1 [1]     ; priprava registru X na IFG
+
+    ifg:                            
+    set pins 0b00000    side 0 [2]  
+    jmp x-- ifg         side 1 [1]
+
+    irq wait 0          side 0      ; Pro sledování z venčí (pio_sm_blocking)
+.wrap
