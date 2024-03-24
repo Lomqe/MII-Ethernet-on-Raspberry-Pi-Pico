@@ -23,11 +23,8 @@ void adc_main(void){
     sleep_ms(250);
 
     //while(pio_interrupt_get(pio0, 0)) printf("PIO IRQ!\n\n");
-
-    uint data1 = sensor_sample(&sensor1);
-    uint data2 = sensor_sample(&sensor2);
-    write_sensor_data(data1, data2);
-    //write_sensor_data(sensor_sample(&sensor1), sensor_sample(&sensor2));
+    
+    write_sensor_data(sensor_sample(&sensor1), sensor_sample(&sensor2));
     sampling = 0;
   }
 }
