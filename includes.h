@@ -2,6 +2,7 @@
 
 // DEFAULT
 #include <stdio.h>
+#include <stdlib.h>
 
 // RPP
 #include "pico/stdlib.h"
@@ -16,6 +17,7 @@
 #include "miim.h"
 #include "test.h"
 #include "ethernet.h"
+#include "sensors.h"
 
 // PIOASM
 #include "mii_tx.pio.h"
