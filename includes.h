@@ -19,5 +19,7 @@
 #include "ethernet.h"
 #include "sensors.h"
 
+#include "link.h"       // Linker test
+
 // PIOASM
 #include "mii_tx.pio.h"
