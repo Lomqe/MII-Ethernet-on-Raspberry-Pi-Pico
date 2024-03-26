@@ -20,7 +20,7 @@ static uint8_t sensor_sample(struct sensor* s){
     uint right_index = 1;
     for(; right_index < s->size; ++right_index){ 
         if(!(s->sample_val < s->lut_volt[right_index])){
-        left_index = right_index-1;
+            left_index = right_index-1;
         break;
         }
     }
@@ -36,14 +36,14 @@ static void sensors_init(){
     sensor1.adc_input = 0;
     sensor1.lut_cm = sensor1_lut_cm;
     sensor1.lut_volt = sensor1_lut_volt;
-    sensor1.size = sizeof(sensor1_lut_cm)/(sizeof(uint8_t));
+    sensor1.size = sizeof(sensor1_lut_cm)/sizeof(sensor1_lut_cm[0]);
     sensor1.max_val = SENSOR1_MAX_VAL;
     sensor1.min_val = SENSOR1_MIN_VAL;
 
     sensor2.adc_input = 1;
     sensor2.lut_cm = sensor2_lut_cm;
     sensor2.lut_volt = sensor2_lut_volt;
-    sensor2.size = sizeof(sensor2_lut_cm)/sizeof(uint8_t);
+    sensor2.size = sizeof(sensor2_lut_cm)/sizeof(sensor2_lut_cm[0]);
     sensor2.max_val = SENSOR2_MAX_VAL;
     sensor2.min_val = SENSOR2_MIN_VAL;
 }
