@@ -16,15 +16,15 @@ void adc_main(void){
   sensors_init();
 
   while(true){
-    // Important when it comes to RELEASE mode
+    // Important especially when it comes to RELEASE mode
     dma_channel_wait_for_finish_blocking(tx_dma);
 
     sampling = 1;
-    sleep_ms(250);
+    sleep_ms(100);
 
     //while(pio_interrupt_get(pio0, 0)) printf("PIO IRQ!\n\n");
     
-    write_sensor_data(sensor_sample(&sensor1), sensor_sample(&sensor2));
+    write_sensor_data(sensor_sample(&sensor1), sensor_sample(&sensor2), ++packet_count);
     sampling = 0;
   }
 }
@@ -39,7 +39,7 @@ void adc_main(void){
   gpio_init(KSZ_RST);
   gpio_set_dir(KSZ_RST, GPIO_OUT);
   gpio_put(KSZ_RST, false);
-
+  
   // Change sys_clk
   // The bigger the VCO freq the lower the jitter it generates
   set_sys_clock_pll(VCO_FREQ_1500KHZ, 6, 2);
@@ -47,6 +47,9 @@ void adc_main(void){
   stdio_init_all();
   sleep_ms(2000);
   printf("inicialized with CLK_SYS = %d MHz\n", clock_get_hz(clk_sys)/MHZ);
+
+  // Release mode test
+  printf("Control register = %02X\n", mii_mdio_read(phy_address, KSZ_BASIC_CONTROL_REG)); 
 
   // PIO 
   
@@ -93,19 +96,22 @@ void adc_main(void){
   #endif
 
   multicore_launch_core1(adc_main);
-  printf("Control register = %02X\n", mii_mdio_read(phy_address, 0));
+  printf("Control register = %02X\n", mii_mdio_read(phy_address, KSZ_BASIC_CONTROL_REG));
   
   while(true){    
     //if(gpio_get(KSZ_TXEN)) test_impulse();
 
+    //link_test();
+    
     // Re-sending a unique packet
     while(!sampling){
+
       
       #ifdef TX_OPT_2
-      int packet_length = sizeof(ethernet_packet2)/sizeof(uint32_t);
+      int packet_length = sizeof(ethernet_packet2)/sizeof(ethernet_packet2[0]);
       mii_ethernet_output_opt2(ethernet_packet2, packet_length);
-      #else
-      int packet_length = sizeof(ethernet_packet)/sizeof(uint8_t);
+      #else 
+      int packet_length = sizeof(ethernet_packet)/sizeof(ethernet_packet[0]);
       mii_ethernet_output_opt(ethernet_packet, packet_length);
       #endif
 
@@ -113,3 +119,5 @@ void adc_main(void){
     }
   }
 }
+
+// Pro netcat si nastavit IP a submask na 255.255.0.0
