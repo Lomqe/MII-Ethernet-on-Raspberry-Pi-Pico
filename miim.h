@@ -25,19 +25,15 @@ static uint16_t mii_mdio_read(uint addr, uint reg);
 
 static void mii_mdio_out(bool bit){
     gpio_put(KSZ_MDC, 0);
-    sleep_us(1);
     gpio_put(KSZ_MDIO, bit);
     gpio_put(KSZ_MDC, 1);
-    sleep_us(1);
 }
 
 static bool mii_mdio_in(){
     gpio_put(KSZ_MDC, 0);
-    sleep_us(1);
     gpio_put(KSZ_MDC, 1);
     
     bool bit = gpio_get(KSZ_MDIO);
-    sleep_us(1);
     return bit;
 }
 
