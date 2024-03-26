@@ -1,4 +1,4 @@
-; kvuli PREAMBLE + SFD musim nastavit overlap pres out piny 
+; Overlap pins with OUT / SET instruction for Preamble + SFD part 
 ;
 ;           CLK     TX0     TX1     TX2     TX3     TXEN
 ;            ^       ^       ^       ^       ^       ^
@@ -9,35 +9,34 @@
 .program mii_opt_tx
 .side_set 1 opt
 .wrap_target    
-    pull                side 0      ; pull counter val
+    pull block          side 0      ; pull counter val
     out null, 24                    ; counter is stored on left so remove 24 bits first
-    set x, 14                       ; preamble count
-    mov y, osr               
-    out null, 8                     ; discrad the counter after storing it into Y scratch
+    mov y, osr                      ; move counter to scratch Y
+    out null, 8                     ; discrad the counter after storing it into scratch Y
+    set x, 14                       ; set preamble counter
     
-    ;set y, 31           side 0     ; Pouze pro DEBUG 
+    ;set y, 31           side 0     ; For DEBUG purposes 
     preamble:   
     set pins 0b10101    side 0 [2]  
     jmp x-- preamble    side 1 [1]
     
 ;   SFD
-    set x, 23           side 0      ; priprava registru X na IFG
-    set pins 0b10111    side 0 [1]  
-    nop                 side 1 [1]
+    set pins 0b10111    side 0 [2]  
+    set x, 23           side 1 [1]  ; Prepare X counter for IFG
         
     data:                           ; data + crc         
-    pull                side 0
-    out pins 4          side 0 [1]  ; 4 bity z OSR
+    pull block          side 0
+    out pins 4          side 0 [1]  ; out 4 bits from OSR
     nop                 side 1 [1]
 
-    out pins 4          side 0 [2]
+    out pins 4          side 0 [2]  ; out 4 bits from OSR
     jmp y-- data        side 1 [1]
 
-    ifg:                            ; 24 nibblu
+    ifg:                            
     set pins 0b00000    side 0 [2]  
     jmp x-- ifg         side 1 [1]
 
-    irq wait 0          side 0      ; Pro sledování z venčí (pio_sm_blocking)
+    ;irq wait 0          side 0      ; Used for monitoring in C code "while(pio_get_irq...)"
 .wrap
 
 % c-sdk {
@@ -192,61 +191,3 @@ static inline void mii_opt_tx2_init(PIO pio, uint sm, uint offset, uint pin) {
     pio_sm_set_enabled(pio, sm, true);
 }
 %}
-
-
-.program mii_opt_tx_NOT_IN_USE
-.side_set 1 
-; pouze pro zkousku abych otestoval IRQ z venci.
-; jedna se o statickou velikost bufferu a neni uplne
-; optimalni, pio program je akorat 32 instrukci
-.wrap_target    
-    set x, 14           side 0      ; preamble count
-    set y, 30           side 0 [2]    ;debug instrukce POUZE
-    
-    preamble:   
-    set pins 0b10101    side 0 [2]  
-    jmp x-- preamble    side 1 [1]
-    
-;   SFD
-    set pins 0b10111    side 0 [2]  
-    nop                 side 1 [1]
-        
-    data:                           ; data + crc         
-    pull                side 0
-    out pins 4          side 0 [1]  ; 4 bity z OSR
-    nop                 side 1 [1]
-
-    out pins 4          side 0 [2]
-    jmp y-- data        side 1 [1]
-                                                
-    pull                side 0  
-    out pins 4          side 0
-    set y, 30           side 0
-    set x, 20           side 1 
-    nop                 side 1
-
-    data1:                           ; data + crc         
-    pull                side 0
-    out pins 4          side 0 [1]  ; 4 bity z OSR
-    nop                 side 1 [1]
-
-    out pins 4          side 0 [2]
-    jmp y-- data1       side 1 [1]
-
-    data2:        
-    pull                side 0
-    out pins 4          side 0 [1]  ; 4 bity z OSR
-    nop                 side 1 [1]
-
-    out pins 4          side 0 [2]
-    jmp x-- data2       side 1 [1]
-    
-    out pins 4          side 0 [2]
-    set x, 31           side 1 [1]     ; priprava registru X na IFG
-
-    ifg:                            
-    set pins 0b00000    side 0 [2]  
-    jmp x-- ifg         side 1 [1]
-
-    irq wait 0          side 0      ; Pro sledování z venčí (pio_sm_blocking)
-.wrap
