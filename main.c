@@ -1,9 +1,8 @@
-//#define _10_MBPS    
-//#define _100_MBPS   
+//#define _10_MBPS
+//#define _100_MBPS
 //#define TX_OPT_2
-
+#define TX_OPT
 #include "includes.h"
-
 
 ////////////////
 // ADC Thread //
@@ -51,19 +50,22 @@ void adc_main(void){
   // Release mode test
   printf("Control register = %02X\n", mii_mdio_read(phy_address, KSZ_BASIC_CONTROL_REG)); 
 
-  // PIO 
+  // pokus o odstranění 1 KHz rušení
+  xip_ctrl_hw->ctrl &= ~(1 << XIP_CTRL_EN_LSB);
+  xip_ctrl_hw->ctrl |= (1 << XIP_CTRL_POWER_DOWN_LSB);
   
+  // PIO 
   #ifdef _10_MBPS
   // Set speed to 10 Mbps
   mii_mdio_write(phy_address, KSZ_BASIC_CONTROL_REG, 0x0);
-  uint pio0_offset = pio_add_program(pio0, &mii_10mhz_tx_program);
+  uint pio0_offset = pio_add_program(pio0, &mii_tx_program);
   mii_10mhz_tx_init(pio0, sm_tx, pio0_offset, KSZ_TXEN);
   #endif 
 
   #ifdef _100_MBPS
   // Set speed to 100 Mbps
   mii_mdio_write(phy_address, KSZ_BASIC_CONTROL_REG, 0x2000);
-  uint pio0_offset = pio_add_program(pio0, &mii_100mhz_tx_program);
+  uint pio0_offset = pio_add_program(pio0, &mii_tx_program);
   mii_100mhz_tx_init(pio0, sm_tx, pio0_offset, KSZ_TXEN);
   #endif
 
@@ -71,7 +73,8 @@ void adc_main(void){
   mii_mdio_write(phy_address, KSZ_BASIC_CONTROL_REG, 0x2000);
   uint pio0_offset = pio_add_program(pio0, &mii_opt_tx2_program);
   mii_opt_tx2_init(pio0, sm_tx, pio0_offset, KSZ_TXEN);
-  #else
+  #endif
+  #ifdef TX_OPT
   mii_mdio_write(phy_address, KSZ_BASIC_CONTROL_REG, 0x2000);
   uint pio0_offset = pio_add_program(pio0, &mii_opt_tx_program);
   mii_opt_tx_init(pio0, sm_tx, pio0_offset, KSZ_TXEN);
@@ -94,6 +97,7 @@ void adc_main(void){
   channel_config_set_read_increment(&tx_dma_config, true);
   channel_config_set_dreq(&tx_dma_config, pio_get_dreq(pio0, sm_tx, true));
   #endif
+
 
   multicore_launch_core1(adc_main);
   printf("Control register = %02X\n", mii_mdio_read(phy_address, KSZ_BASIC_CONTROL_REG));
