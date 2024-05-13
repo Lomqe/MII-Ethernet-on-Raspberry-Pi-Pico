@@ -143,10 +143,7 @@ void mii_ethernet_output_opt(uint8_t* tx_buffer, int length){
         tx_frame,
         index,                 
         true
-    );
-
-    printf("config_dma = %X\n", &tx_dma_config); 
-
+    );  
 }
 
 // 32 bit version - LENGTH HAS TO BE DIVISIBLE BY 4 !!!
