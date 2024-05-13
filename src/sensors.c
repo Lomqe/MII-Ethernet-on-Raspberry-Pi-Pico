@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 
+#include "../header/defines.h"
 #include "../header/sensors.h"
 #include "hardware/adc.h"
 
@@ -25,22 +27,48 @@ uint8_t sensor_sample(struct sensor* s){
     //                example for values between 50 - 60 cm
     //                60   - (60-50)     * (val-1.05) / (1.25-1.05)
     //                i[2] - (i[2]-i[1]) * (val-i[2]) / (i[1]-i[2]) 
-    return (uint8_t)((float)s->lut_cm[right_index] - ((float)s->lut_cm[right_index]-(float)s->lut_cm[left_index]) * 
+    return (uint8_t)((float)s->lut_cm[right_index]-((float)s->lut_cm[right_index]-(float)s->lut_cm[left_index]) * 
           (s->sample_val-s->lut_volt[right_index])/(s->lut_volt[left_index]-s->lut_volt[right_index]));
 }
 
-void sensors_init(){
-    sensor1.adc_input = 0;
-    sensor1.lut_cm = sensor1_lut_cm;
-    sensor1.lut_volt = sensor1_lut_volt;
-    sensor1.size = sizeof(sensor1_lut_cm)/sizeof(sensor1_lut_cm[0]);
-    sensor1.max_val = SENSOR1_MAX_VAL;
-    sensor1.min_val = SENSOR1_MIN_VAL;
+struct sensor sensors_init(uint8_t number){   
+    struct sensor s;
 
-    sensor2.adc_input = 1;
-    sensor2.lut_cm = sensor2_lut_cm;
-    sensor2.lut_volt = sensor2_lut_volt;
-    sensor2.size = sizeof(sensor2_lut_cm)/sizeof(sensor2_lut_cm[0]);
-    sensor2.max_val = SENSOR2_MAX_VAL;
-    sensor2.min_val = SENSOR2_MIN_VAL;
+    if(number){
+        s.adc_input = number;
+        s.lut_cm = sensor2_lut_cm;
+        s.lut_volt = sensor2_lut_volt;
+        s.size = sizeof(sensor2_lut_cm)/sizeof(sensor2_lut_cm[0]);
+        s.max_val = SENSOR2_MAX_VAL;
+        s.min_val = SENSOR2_MIN_VAL;
+        
+    }
+    else{
+        s.adc_input = number;
+        s.lut_cm = sensor1_lut_cm;
+        s.lut_volt = sensor1_lut_volt;
+        s.size = sizeof(sensor1_lut_cm)/sizeof(sensor1_lut_cm[0]);
+        s.max_val = SENSOR1_MAX_VAL;
+        s.min_val = SENSOR1_MIN_VAL;
+    }
+
+    return s;
+}
+
+void write_sensor_data(uint8_t dist1, uint8_t dist2, uint32_t packet_count, uint8_t *packet){
+    uint8_t val1[4] = {0x0, 0x0, 0x0, 0x0};
+    uint8_t val2[4] = {0x0, 0x0, 0x0, 0x0};
+    uint8_t val3[6] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+
+    itoa(dist1, val1, 10);
+    itoa(dist2, val2, 10);
+    itoa(packet_count, val3, 10);
+
+    for(uint8_t i = 0; i < 6; ++i)
+        packet[57+i] = val3[i];
+
+    for(uint8_t i = 0; i < 3; ++i){
+      packet[76+i] = val1[i]; 
+      packet[95+i] = val2[i];
+    }
 }
