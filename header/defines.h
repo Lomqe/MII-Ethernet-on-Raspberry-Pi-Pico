@@ -71,7 +71,7 @@ static uint32_t ethernet_packet2[] = {
     };
 
 // Test packet
-const static uint8_t netcat_packet[] = {
+static uint8_t netcat_packet[] = {
     //  Ethernet II
     0xC8, 0x7F, 0x54, 0xA5, 0x83, 0x5D,     // Destination MAC                        
     0xC8, 0x7F, 0x54, 0x69, 0x8A, 0xDA,     // Source MAC
@@ -99,6 +99,6 @@ static uint8_t tx_frame[TX_FRAME_SIZE];
 static uint8_t tx_frame_bits[TX_FRAME_SIZE * 2u];
 static uint32_t tx_frame_32b[TX_FRAME_SIZE/4];
 
-static uint sm_tx = 0;
+static uint sm_tx;
 static uint tx_dma;
 static dma_channel_config tx_dma_config;
