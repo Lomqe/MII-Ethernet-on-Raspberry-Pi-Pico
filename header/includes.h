@@ -10,11 +10,11 @@
 #include "hardware/structs/xip_ctrl.h"  
 
 // PROJECT
-#include "defines.h"
-#include "miim.h"
-#include "test.h"
-#include "ethernet.h"
-#include "sensors.h"
+#include "../header/defines.h"
+#include "../header/miim.h"
+#include "../header/test.h"
+#include "../header/ethernet.h"
+#include "../header/sensors.h"
 
 // PIOASM
 #include "mii_tx.pio.h"
