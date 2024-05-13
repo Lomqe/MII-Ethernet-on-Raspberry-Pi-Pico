@@ -1,20 +1,13 @@
-/*
- * Copyright (c) 2024 Jan Zima
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
 .program mii_rx
-;tohle zmenit piny 
     wait 0 pin 4
-    wait 0 pin 0
     wait 0 pin 3
 
     wait 1 pin 4
-    wait 1 pin 0
     wait 1 pin 3
 .wrap_target
-    in pins 4
+    wait 1 pin 0    [1]
+    in pins 4       [1]
+    wait 0 pin 0
 .wrap
 
 % c-sdk {
@@ -25,11 +18,11 @@ static inline void mii_100mhz_rx_init(PIO pio, uint sm, uint offset, uint pin) {
     pio_sm_config c = mii_rx_program_get_default_config(offset);
     sm_config_set_in_pins(&c, pin);
 
-    pio_gpio_init(pio, pin);
-    pio_gpio_init(pio, pin + 1);
-    pio_gpio_init(pio, pin + 2);
-    pio_gpio_init(pio, pin + 3);
-    pio_gpio_init(pio, pin + 4);
+    pio_gpio_init(pio, pin);        // RXC
+    pio_gpio_init(pio, pin + 1);    // RXD0
+    pio_gpio_init(pio, pin + 2);    // RXD1
+    pio_gpio_init(pio, pin + 3);    // RXD2
+    pio_gpio_init(pio, pin + 4);    // RXD3
     
     sm_config_set_in_shift(&c, true, true, 8);
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
