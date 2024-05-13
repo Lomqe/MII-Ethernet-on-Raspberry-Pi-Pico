@@ -1,4 +1,4 @@
-add_executable(mii src/main.c src/miim.c src/ethernet.c src/sensors.c src/test.c)
+add_executable(mii src/main.c src/miim.c src/test.c src/sensors.c src/ethernet.c)
 
 pico_generate_pio_header(mii ${CMAKE_CURRENT_LIST_DIR}/src/mii_tx.pio)
 pico_generate_pio_header(mii ${CMAKE_CURRENT_LIST_DIR}/src/mii_rx.pio)
