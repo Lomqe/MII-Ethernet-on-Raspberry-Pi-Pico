@@ -1,6 +1,6 @@
 ; Overlap pins with OUT / SET instruction for Preamble + SFD part 
 ;
-;           CLK     TX0     TX1     TX2     TX3     TXEN
+;           TXC     TX0     TX1     TX2     TX3     TXEN
 ;            ^       ^       ^       ^       ^       ^
 ;            |       |       |       |       |       |
 ;           side    out     out     out     out     set
