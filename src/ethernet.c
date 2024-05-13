@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "../header/ethernet.h"
 #include "../header/defines.h"
@@ -115,7 +116,7 @@ void mii_ethernet_output_opt(uint8_t* tx_buffer, int length){
     // DATA
     for (int i = 0; i < length; i++){
         uint8_t b = tx_buffer[i];                           
-        tx_frame[index++] =        ((b >> 3) & 0x11)    
+        tx_frame[index++] =             ((b >> 3) & 0x11)    
                                       | ((b >> 1) & 0x22)
                                       | ((b << 1) & 0x44)
                                       | ((b << 3) & 0x88);
@@ -124,24 +125,28 @@ void mii_ethernet_output_opt(uint8_t* tx_buffer, int length){
     // CRC
     for (int i = 0; i < 4; i++){
         uint8_t b = ((uint8_t*)&crc)[i];
-        tx_frame[index++] =        ((b >> 3) & 0x11)
+        tx_frame[index++] =             ((b >> 3) & 0x11)
                                       | ((b >> 1) & 0x22)
                                       | ((b << 1) & 0x44)
                                       | ((b << 3) & 0x88);
     }
 
-    // potreba snizit o dva jelikoz prvni byte je 
-    // v pio programu odeslan bez odecteni scratch reg.
-    // a jeden pull je pro samotnou hodnotu bytu
+    // Decrement by two since first byte is sent before
+    // Decrementing loop counter and one byte is the 
+    // counter value itself
     tx_frame[0] = index-2;
-
+    
     dma_channel_configure(
         tx_dma, &tx_dma_config,
+      //  tx_dma, c,
         &pio0->txf[sm_tx],
         tx_frame,
         index,                 
         true
     );
+
+    printf("config_dma = %X\n", &tx_dma_config); 
+
 }
 
 // 32 bit version - LENGTH HAS TO BE DIVISIBLE BY 4 !!!
@@ -182,22 +187,4 @@ void mii_ethernet_output_opt2(uint32_t* tx_buffer, int length){
         index,                 
         true
     );
-}
-
-void write_sensor_data(uint8_t dist1, uint8_t dist2, uint32_t packet_count){
-    uint8_t val1[4] = {0x0, 0x0, 0x0, 0x0};
-    uint8_t val2[4] = {0x0, 0x0, 0x0, 0x0};
-    uint8_t val3[6] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-
-    itoa(dist1, val1, 10);
-    itoa(dist2, val2, 10);
-    itoa(packet_count, val3, 10);
-
-    for(uint8_t i = 0; i < 6; ++i)
-        ethernet_packet[57+i] = val3[i];
-
-    for(uint8_t i = 0; i < 3; ++i){
-      ethernet_packet[76+i] = val1[i]; 
-      ethernet_packet[95+i] = val2[i];
-    }
 }
