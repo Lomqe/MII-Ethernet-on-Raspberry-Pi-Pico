@@ -13,7 +13,8 @@ void adc_main(void){
   adc_init();  
   adc_gpio_init(RPP_SENSOR1); 
   adc_gpio_init(RPP_SENSOR2);
-  sensors_init();
+  struct sensor sensor0 = sensors_init(0);
+  struct sensor sensor1 = sensors_init(1);
   
   uint32_t packet_count = 0;
   while(true){
@@ -21,11 +22,11 @@ void adc_main(void){
     dma_channel_wait_for_finish_blocking(tx_dma);
 
     sampling = 1;
-    sleep_ms(100);
+    sleep_ms(200);
 
     //while(pio_interrupt_get(pio0, 0)) printf("PIO IRQ!\n\n");
-    
-    write_sensor_data(sensor_sample(&sensor1), sensor_sample(&sensor2), ++packet_count);
+
+    write_sensor_data(sensor_sample(&sensor0), sensor_sample(&sensor1), ++packet_count, ethernet_packet);
     sampling = 0;
   }
 }
@@ -88,7 +89,7 @@ int main(void){
 
   tx_dma = dma_claim_unused_channel(true);
   tx_dma_config = dma_channel_get_default_config(tx_dma);
-  
+
   #ifdef TX_OPT_2
   channel_config_set_transfer_data_size(&tx_dma_config, DMA_SIZE_32);
   channel_config_set_bswap(&tx_dma_config, true);
@@ -102,13 +103,11 @@ int main(void){
   channel_config_set_dreq(&tx_dma_config, pio_get_dreq(pio0, sm_tx, true));
   #endif
 
-
   multicore_launch_core1(adc_main);
   printf("Control register = %02X\n", mii_mdio_read(phy_address, KSZ_BASIC_CONTROL_REG));
   
   while(true){    
     //if(gpio_get(KSZ_TXEN)) test_impulse();
-
     // Re-sending a unique packet
     while(!sampling){
 
